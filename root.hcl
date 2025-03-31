@@ -16,3 +16,19 @@ inputs = merge(
   local.team_vars.locals
 )
 
+# Configure Terragrunt to automatically store tfstate files in a GCS bucket
+remote_state {
+  backend = "gcs"
+
+  config = {
+    project  = ""
+    location = ""
+    bucket   = ""
+    prefix   = "${path_relative_to_include()}/terraform.tfstate"
+
+    gcs_bucket_labels = {
+      owner = "terragrunt"
+      name  = "terraform_state_storage"
+    }
+  }
+}
