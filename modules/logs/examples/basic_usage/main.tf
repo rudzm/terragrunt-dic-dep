@@ -10,6 +10,46 @@ module "log_bucket" {
   }
 }
 
+module "log_bucket_app" {
+  source         = "../../modules/log_bucket"
+  project_id     = "my-project"
+  name           = "app-logs"
+  location       = "global"
+  retention_days = 30
+
+  views = [
+    {
+      name        = "error-view"
+      filter      = "severity>=ERROR"
+      description = "Widok dla errorów"
+    },
+    {
+      name        = "gce-view"
+      filter      = "resource.type=gce_instance"
+      description = "Widok dla GCE"
+    }
+  ]
+
+  # IAM bindings do widoków
+  view_iam_bindings = [
+    {
+      view_name = "error-view"
+      role      = "roles/logging.viewAccessor"
+      members   = [
+        "user:devops@example.com",
+        "serviceAccount:analytics@my-project.iam.gserviceaccount.com"
+      ]
+    },
+    {
+      view_name = "gce-view"
+      role      = "roles/logging.viewAccessor"
+      members   = [
+        "group:platform-team@example.com"
+      ]
+    }
+  ]
+}
+
 module "project_sink" {
   source            = "../../modules/log_sink"
   project_id        = "my-project"
