@@ -12,7 +12,7 @@ resource "google_logging_project_sink" "project" {
   project                = coalesce(each.value.project_id, var.project_id)
   destination            = each.value.destination
   filter                 = each.value.filter
-  unique_writer_identity = true
+  unique_writer_identity = try(each.value.unique_writer_identity, false)
 
   dynamic "exclusions" {
     for_each = each.value.exclusions
@@ -26,11 +26,11 @@ resource "google_logging_project_sink" "project" {
 }
 
 resource "google_logging_folder_sink" "folder" {
-  for_each               = local.by_type.folder
-  name                   = each.key
-  folder                 = each.value.folder_id
-  destination            = each.value.destination
-  filter                 = each.value.filter
+  for_each    = local.by_type.folder
+  name        = each.key
+  folder      = each.value.folder_id
+  destination = each.value.destination
+  filter      = each.value.filter
 
   dynamic "exclusions" {
     for_each = each.value.exclusions
@@ -44,11 +44,11 @@ resource "google_logging_folder_sink" "folder" {
 }
 
 resource "google_logging_organization_sink" "org" {
-  for_each               = local.by_type.organization
-  name                   = each.key
-  org_id                 = each.value.org_id
-  destination            = each.value.destination
-  filter                 = each.value.filter
+  for_each    = local.by_type.organization
+  name        = each.key
+  org_id      = each.value.org_id
+  destination = each.value.destination
+  filter      = each.value.filter
 
   dynamic "exclusions" {
     for_each = each.value.exclusions
