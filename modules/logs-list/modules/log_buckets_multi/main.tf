@@ -12,7 +12,7 @@ resource "google_logging_project_bucket_config" "bucket" {
 locals {
   views_flat = merge([
     for bucket_name, cfg in var.buckets :
-    { for v in try(cfg.views, []) :
+    { for v in (cfg.views != null ? cfg.views : []) :
       "${bucket_name}/${v.name}" => merge(v, {
         bucket_name = bucket_name,
         location    = cfg.location
@@ -33,7 +33,7 @@ resource "google_logging_log_view" "view" {
 locals {
   iam_flat = merge([
     for bucket_name, cfg in var.buckets :
-    { for b in try(cfg.view_iam_bindings, []) :
+    { for b in (cfg.view_iam_bindings != null ? cfg.view_iam_bindings : []) :
       "${bucket_name}/${b.view_name}/${b.role}" => merge(b, {
         bucket_name = bucket_name,
         view_name   = b.view_name,
