@@ -1,29 +1,21 @@
 
-locals {
-  buckets_effective = {
-    for name, cfg in var.buckets : name => merge(cfg, {
-      retention_days = (
-        contains(keys(cfg), "retention_days") ?
-        cfg.retention_days :
-        (
-          contains(var.project_id, "dev") ? 3 :
-          contains(var.project_id, "tst") ? 7 :
-          contains(var.project_id, "dem") ? 30 :
-          contains(var.project_id, "prd") ? 30 :
-          30
-        )
-      )
-    })
-  }
-}
 
 resource "google_logging_project_bucket_config" "bucket" {
-  for_each = local.buckets_effective
-
+  for_each = var.buckets
   project        = var.project_id
   location       = each.value.location
   bucket_id      = each.key
-  retention_days = each.value.retention_days
+  retention_days = (
+    contains(keys(each.value), "retention_days") && each.value.retention_days != null ?
+    each.value.retention_days :
+    (
+      length(regexall("dev", var.project_id))     > 0 ? 3  :
+      length(regexall("tst", var.project_id))     > 0 ? 7  :
+      length(regexall("dem", var.project_id))     > 0 ? 30 :
+      length(regexall("prd", var.project_id))     > 0 ? 30 :
+      15
+    )
+  )
   description    = each.value.description
 }
 
