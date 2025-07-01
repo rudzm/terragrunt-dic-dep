@@ -8,7 +8,7 @@ variable "buckets" {
   description = "Map of log buckets and their configuration"
   type = map(object({
     location       = string
-    retention_days = number
+    retention_days = optional(number)
     description    = optional(string)
     views = optional(list(object({
       name        = string
